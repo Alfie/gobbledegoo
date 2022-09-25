@@ -1,17 +1,19 @@
 pragma solidity 0.8.10;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
+import {DSTestPlus} from "solmate/test/utils/DSTestPlus.sol";
+import {Vm} from "2022-09-artgobblers.git/../lib/forge-std/src/Vm.sol";
+import {stdError} from "2022-09-artgobblers.git/../lib/forge-std/src/Test.sol";
 import "../TicTacToken.sol";
 import {ArtGobblers, FixedPointMathLib} from "2022-09-artgobblers.git/ArtGobblers.sol";
 import {Goo} from "2022-09-artgobblers.git/Goo.sol";
 import {Pages} from "2022-09-artgobblers.git/Pages.sol";
 import {GobblerReserve} from "2022-09-artgobblers.git/utils/GobblerReserve.sol";
-import {Utilities} from "2022-09-artgobblers.git/../test/utils/Utilities.sol";
+import {Utilities} from "./utils/Utilities.sol";
 import {ChainlinkV1RandProvider} from "2022-09-artgobblers.git/utils/rand/ChainlinkV1RandProvider.sol";
 import {RandProvider} from "2022-09-artgobblers.git/utils/rand/RandProvider.sol";
 import {VRFCoordinatorMock} from "2022-09-artgobblers.git/../lib/chainlink/contracts/src/v0.8/mocks/VRFCoordinatorMock.sol";
 import {LinkToken} from "2022-09-artgobblers.git/../test/utils/mocks/LinkToken.sol";
+import {LibString} from "solmate/utils/LibString.sol";
 
 contract Caller {
 
@@ -25,8 +27,10 @@ contract Caller {
     }
 }
 
-contract TicTacTokenTest is DSTest {
-    Vm public constant vm = Vm(HEVM_ADDRESS);
+contract TicTacTokenTest is DSTestPlus {
+    using LibString for uint256;
+
+    Vm internal immutable vm = Vm(HEVM_ADDRESS);
 
     //******gobbler stuff********* */
     ArtGobblers internal gobblers;
@@ -37,6 +41,7 @@ contract TicTacTokenTest is DSTest {
     VRFCoordinatorMock internal vrfCoordinator;
     LinkToken internal linkToken;
     Goo internal goo;
+    Pages internal pages;
 
     bytes32 private keyHash;
     uint256 private fee;
@@ -70,6 +75,13 @@ contract TicTacTokenTest is DSTest {
             fee
         );
 
+        goo = new Goo(
+            // Gobblers:
+            utils.predictContractAddress(address(this), 1),
+            // Pages:
+            utils.predictContractAddress(address(this), 2)
+        );
+
         gobblers = new ArtGobblers(
             keccak256(abi.encodePacked(users[0])),
             block.timestamp,
@@ -81,6 +93,10 @@ contract TicTacTokenTest is DSTest {
             "base",
             ""
         );
+
+        pages = new Pages(block.timestamp, goo, address(0xBEEF), gobblers, "");
+
+        //----------------------------------------------------------------
         ttt = new TicTacToken(OWNER);
     }
 
