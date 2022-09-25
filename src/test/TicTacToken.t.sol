@@ -3,6 +3,15 @@ pragma solidity 0.8.10;
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
 import "../TicTacToken.sol";
+import {ArtGobblers, FixedPointMathLib} from "2022-09-artgobblers.git/ArtGobblers.sol";
+import {Goo} from "2022-09-artgobblers.git/Goo.sol";
+import {Pages} from "2022-09-artgobblers.git/Pages.sol";
+import {GobblerReserve} from "2022-09-artgobblers.git/utils/GobblerReserve.sol";
+import {Utilities} from "2022-09-artgobblers.git/../test/utils/Utilities.sol";
+import {ChainlinkV1RandProvider} from "2022-09-artgobblers.git/utils/rand/ChainlinkV1RandProvider.sol";
+import {RandProvider} from "2022-09-artgobblers.git/utils/rand/RandProvider.sol";
+import {VRFCoordinatorMock} from "2022-09-artgobblers.git/../lib/chainlink/contracts/src/v0.8/mocks/VRFCoordinatorMock.sol";
+import {LinkToken} from "2022-09-artgobblers.git/../test/utils/mocks/LinkToken.sol";
 
 contract Caller {
 
@@ -18,6 +27,23 @@ contract Caller {
 
 contract TicTacTokenTest is DSTest {
     Vm public constant vm = Vm(HEVM_ADDRESS);
+
+    //******gobbler stuff********* */
+    ArtGobblers internal gobblers;
+    GobblerReserve internal team;
+    GobblerReserve internal community;
+    Utilities internal utils;
+    RandProvider internal randProvider;
+    VRFCoordinatorMock internal vrfCoordinator;
+    LinkToken internal linkToken;
+    Goo internal goo;
+
+    bytes32 private keyHash;
+    uint256 private fee;
+    address payable[] internal users;
+
+    //------------------------------------
+
     TicTacToken internal ttt;
     address internal constant OWNER = address(1);
 
@@ -28,7 +54,45 @@ contract TicTacTokenTest is DSTest {
     address public owner;
 
     function setUp() public{
+        utils = new Utilities();
+        users = utils.createUsers(5);
+
+        address gobblerAddress = utils.predictContractAddress(address(this), 4);
+        address pagesAddress = utils.predictContractAddress(address(this), 5);
+
+        team = new GobblerReserve(ArtGobblers(gobblerAddress), address(this));
+        community = new GobblerReserve(ArtGobblers(gobblerAddress), address(this));
+        randProvider = new ChainlinkV1RandProvider(
+            ArtGobblers(gobblerAddress),
+            address(vrfCoordinator),
+            address(linkToken),
+            keyHash,
+            fee
+        );
+
+        gobblers = new ArtGobblers(
+            keccak256(abi.encodePacked(users[0])),
+            block.timestamp,
+            goo,
+            Pages(pagesAddress),
+            address(team),
+            address(community),
+            randProvider,
+            "base",
+            ""
+        );
         ttt = new TicTacToken(OWNER);
+    }
+
+        /// @notice Test that you can mint from mintlist successfully.
+    function testMintFromMintlist() public {
+        address user = users[0];
+        bytes32[] memory proof;
+        vm.prank(user);
+        gobblers.claimGobbler(proof);
+        // verify gobbler ownership
+        assertEq(gobblers.ownerOf(1), user);
+        assertEq(gobblers.balanceOf(user), 1);
     }
 
     function test_contract_owner() public {
