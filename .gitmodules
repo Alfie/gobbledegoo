@@ -10,3 +10,6 @@
 [submodule "lib/2022-09-artgobblers.git"]
 	path = lib/2022-09-artgobblers.git
 	url = https://github.com/code-423n4/2022-09-artgobblers.git
+[submodule "lib/solmate"]
+	path = lib/solmate
+	url = https://github.com/rari-capital/solmate
