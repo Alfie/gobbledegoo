@@ -6,7 +6,7 @@
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
 [submodule "lib/forge-std"]
 	path = lib/forge-std
-	url = https://github.com/brockelmore/forge-std
+	url = https://github.com/foundry-rs/forge-std
 [submodule "lib/2022-09-artgobblers.git"]
 	path = lib/2022-09-artgobblers.git
 	url = https://github.com/code-423n4/2022-09-artgobblers.git
