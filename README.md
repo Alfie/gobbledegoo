@@ -4,4 +4,5 @@ a test PoC for depositing gobblers from the Paradigm Art Gobblers project and al
 TODO: 
 - complete deposit eth functionality. 
 - add functionality for contract to buy pages/gobblers w/ goo upon function call on behalf of a user who does not have gobblers but             has paid ETH for some amount of goo
+- replace code4rena import w/ official ArtGobblers repo
       
