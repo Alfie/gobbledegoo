@@ -1,5 +1,7 @@
 pragma solidity >=0.8.0;
 
+import "forge-std/console.sol";
+
 import {Gobbledegoo} from "../Gobbledegoo.sol";
 import {DSTestPlus} from "solmate/test/utils/DSTestPlus.sol";
 import {Vm} from "2022-09-artgobblers.git/../lib/forge-std/src/Vm.sol";
@@ -95,6 +97,9 @@ contract GobbledegooTest is DSTestPlus {
         
         vm.prank(users[0]);
         gobbledegoo.depositGobbler(1);
+
+        //vm.warp(block.timestamp + 1 days);
+        console.logUint(gobblers.gooBalance(address(gobbledegoo)));
     }
 
     //HELPERS
